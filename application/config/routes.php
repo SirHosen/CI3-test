@@ -28,3 +28,5 @@ $route['admin/edit/(:num)'] = 'admin/edit/$1';
 $route['admin/view/(:num)'] = 'admin/view/$1';
 $route['admin/delete/(:num)'] = 'admin/delete/$1';
 
+// Tambahkan route ini
+$route['admin/toggle_status/(:num)'] = 'admin/toggle_status/$1';

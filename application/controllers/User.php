@@ -5,10 +5,23 @@ class User extends CI_Controller {
     
     public function __construct() {
         parent::__construct();
+        
+        // Cek login
         if (!$this->session->userdata('logged_in')) {
             redirect('auth/login');
         }
+        
+        // Load model
         $this->load->model('user_model');
+        
+        // Cek status akun
+        $user_id = $this->session->userdata('user_id');
+        if (!$this->user_model->check_user_status($user_id)) {
+            $this->session->unset_userdata(array('user_id', 'username', 'email', 'full_name', 'role', 'logged_in'));
+            $this->session->sess_destroy();
+            $this->session->set_flashdata('error', 'Akun Anda telah dinonaktifkan oleh administrator.');
+            redirect('auth/login');
+        }
     }
     
     public function profile() {

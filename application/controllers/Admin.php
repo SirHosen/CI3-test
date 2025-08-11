@@ -11,15 +11,25 @@ class Admin extends CI_Controller {
             redirect('auth/login');
         }
         
-        // Cek role admin
+        // Load models
         $this->load->model('user_model');
-        $user = $this->user_model->get_user($this->session->userdata('user_id'));
+        $this->load->model('admin_model');
+        
+        // Cek status akun
+        $user_id = $this->session->userdata('user_id');
+        if (!$this->user_model->check_user_status($user_id)) {
+            $this->session->unset_userdata(array('user_id', 'username', 'email', 'full_name', 'role', 'logged_in'));
+            $this->session->sess_destroy();
+            $this->session->set_flashdata('error', 'Akun Anda telah dinonaktifkan oleh administrator.');
+            redirect('auth/login');
+        }
+        
+        // Cek role admin
+        $user = $this->user_model->get_user($user_id);
         if (!$user || $user->role != 'admin') {
             $this->session->set_flashdata('error', 'Anda tidak memiliki akses ke halaman admin!');
             redirect('dashboard');
         }
-        
-        $this->load->model('admin_model');
     }
     
     public function dashboard() {
@@ -45,6 +55,32 @@ class Admin extends CI_Controller {
         $this->load->view('templates/header', $data);
         $this->load->view('admin/users', $data);
         $this->load->view('templates/footer');
+    }
+    
+    public function toggle_status($user_id) {
+        if ($user_id == $this->session->userdata('user_id')) {
+            $this->session->set_flashdata('error', 'Anda tidak dapat menonaktifkan akun sendiri!');
+            redirect('admin/users');
+        }
+        
+        $user = $this->admin_model->get_user_by_id($user_id);
+        if ($user) {
+            $new_status = $user->is_active == 1 ? 0 : 1;
+            $status_text = $new_status == 1 ? 'diaktifkan' : 'dinonaktifkan';
+            
+            if ($this->admin_model->toggle_user_status($user_id)) {
+                $this->user_model->log_activity(
+                    $this->session->userdata('user_id'), 
+                    'TOGGLE_USER_STATUS', 
+                    'Admin ' . $status_text . ' user: ' . $user->username
+                );
+                
+                $this->session->set_flashdata('success', 'User berhasil ' . $status_text . '!');
+            } else {
+                $this->session->set_flashdata('error', 'Gagal mengubah status user!');
+            }
+        }
+        redirect('admin/users');
     }
     
     public function view($user_id) {
@@ -126,26 +162,19 @@ class Admin extends CI_Controller {
     public function reports() {
         $data['title'] = 'Reports';
         
-        // Statistics
         $data['statistics'] = $this->user_model->get_user_statistics();
         
-        // Today's logins
         $this->db->where('DATE(created_at)', date('Y-m-d'));
         $this->db->where('action', 'LOGIN');
         $data['today_logins'] = $this->db->count_all_results('user_logs');
         
-        // New users this month
         $this->db->where('MONTH(created_at)', date('m'));
         $this->db->where('YEAR(created_at)', date('Y'));
         $data['new_users_month'] = $this->db->count_all_results('users');
         
-        // Registration chart data
         $data['registration_chart'] = $this->admin_model->get_user_growth(30);
-        
-        // Activity chart data
         $data['activity_chart'] = $this->admin_model->get_activity_summary(7);
         
-        // Most active users
         $this->db->select('users.*, COUNT(user_logs.id) as login_count, MAX(user_logs.created_at) as last_login');
         $this->db->from('users');
         $this->db->join('user_logs', 'user_logs.user_id = users.id AND user_logs.action = "LOGIN"', 'left');
@@ -155,7 +184,6 @@ class Admin extends CI_Controller {
         $this->db->limit(5);
         $data['active_users'] = $this->db->get()->result();
         
-        // Recent activities
         $data['recent_activities'] = $this->admin_model->get_recent_logs(10);
         
         $this->load->view('templates/header', $data);

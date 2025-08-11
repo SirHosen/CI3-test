@@ -34,27 +34,35 @@ class Auth extends CI_Controller {
             $username = $this->input->post('username', TRUE);
             $password = $this->input->post('password', TRUE);
             
-            $user = $this->user_model->login($username, $password);
+            $result = $this->user_model->login($username, $password);
             
-            if ($user) {
-                $session_data = [
+            if ($result['status'] == 'success') {
+                $user = $result['user'];
+                $session_data = array(
                     'user_id' => $user->id,
                     'username' => $user->username,
                     'email' => $user->email,
                     'full_name' => $user->full_name,
+                    'role' => $user->role,
                     'logged_in' => TRUE
-                ];
+                );
                 $this->session->set_userdata($session_data);
                 
                 $this->session->set_flashdata('success', 'Login berhasil!');
                 redirect('dashboard');
+                
+            } elseif ($result['status'] == 'inactive') {
+                // Akun dinonaktifkan
+                $this->session->set_flashdata('error', $result['message']);
+                redirect('auth/login');
+                
             } else {
-                $this->session->set_flashdata('error', 'Username atau password salah!');
+                // Password salah atau user tidak ditemukan
+                $this->session->set_flashdata('error', $result['message']);
                 redirect('auth/login');
             }
         }
-    }
-    
+    }    
     public function register() {
         if ($this->session->userdata('logged_in')) {
             redirect('dashboard');
