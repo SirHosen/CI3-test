@@ -19,25 +19,41 @@ class User_model extends CI_Model {
         $this->db->or_where('email', $username);
         $user = $this->db->get($this->table)->row();
         
-        if ($user && password_verify($password, $user->password)) {
-            // Update last login
-            $this->db->where('id', $user->id);
-            $this->db->update($this->table, ['updated_at' => date('Y-m-d H:i:s')]);
+        if ($user) {
+            // Cek apakah akun aktif
+            if ($user->is_active == 0) {
+                return array('status' => 'inactive', 'message' => 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator.');
+            }
             
-            // Log activity
-            $this->log_activity($user->id, 'LOGIN', 'User logged in');
-            
-            return $user;
+            // Cek password
+            if (password_verify($password, $user->password)) {
+                // Update last login
+                $this->db->where('id', $user->id);
+                $this->db->update($this->table, array('updated_at' => date('Y-m-d H:i:s')));
+                
+                // Log activity
+                $this->log_activity($user->id, 'LOGIN', 'User logged in');
+                
+                return array('status' => 'success', 'user' => $user);
+            } else {
+                return array('status' => 'error', 'message' => 'Username atau password salah!');
+            }
+        }
+        
+        return array('status' => 'error', 'message' => 'Username atau password salah!');
+    }
+    
+    public function check_user_status($user_id) {
+        $this->db->select('is_active');
+        $this->db->where('id', $user_id);
+        $user = $this->db->get($this->table)->row();
+        
+        if ($user) {
+            return $user->is_active == 1;
         }
         return false;
     }
-    
-    public function check_username($username) {
-        $this->db->where('username', $username);
-        $query = $this->db->get($this->table);
-        return $query->num_rows() == 0;
-    }
-    
+	    
     public function check_email($email) {
         $this->db->where('email', $email);
         $query = $this->db->get($this->table);
