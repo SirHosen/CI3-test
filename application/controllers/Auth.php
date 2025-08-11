@@ -34,16 +34,19 @@ class Auth extends CI_Controller {
             $username = $this->input->post('username', TRUE);
             $password = $this->input->post('password', TRUE);
             
+            // Gunakan method login dari User_model
             $result = $this->user_model->login($username, $password);
             
             if ($result['status'] == 'success') {
                 $user = $result['user'];
+                
+                // Set session data
                 $session_data = array(
                     'user_id' => $user->id,
                     'username' => $user->username,
                     'email' => $user->email,
                     'full_name' => $user->full_name,
-                    'role' => $user->role,
+                    'role' => isset($user->role) ? $user->role : 'user',
                     'logged_in' => TRUE
                 );
                 $this->session->set_userdata($session_data);
@@ -62,7 +65,8 @@ class Auth extends CI_Controller {
                 redirect('auth/login');
             }
         }
-    }    
+    }
+    
     public function register() {
         if ($this->session->userdata('logged_in')) {
             redirect('dashboard');
@@ -82,12 +86,14 @@ class Auth extends CI_Controller {
         if ($this->form_validation->run() == FALSE) {
             $this->register();
         } else {
-            $data = [
+            $data = array(
                 'username' => $this->input->post('username', TRUE),
                 'email' => $this->input->post('email', TRUE),
-                'password' => $this->input->post('password', TRUE),
-                'full_name' => $this->input->post('full_name', TRUE)
-            ];
+                'password' => $this->input->post('password', TRUE), // akan di-hash di model
+                'full_name' => $this->input->post('full_name', TRUE),
+                'role' => 'user', // default role
+                'is_active' => 1  // default active
+            );
             
             if ($this->user_model->register($data)) {
                 $this->session->set_flashdata('success', 'Registrasi berhasil! Silakan login.');
@@ -100,17 +106,22 @@ class Auth extends CI_Controller {
     }
     
     public function logout() {
+        // Log activity sebelum logout
         $user_id = $this->session->userdata('user_id');
         if ($user_id) {
             $this->user_model->log_activity($user_id, 'LOGOUT', 'User logged out');
         }
         
-        $this->session->unset_userdata(['user_id', 'username', 'email', 'full_name', 'logged_in']);
+        // Hapus session
+        $session_items = array('user_id', 'username', 'email', 'full_name', 'role', 'logged_in');
+        $this->session->unset_userdata($session_items);
         $this->session->sess_destroy();
+        
         $this->session->set_flashdata('success', 'Logout berhasil!');
         redirect('auth/login');
     }
     
+    // Callback function untuk validasi username
     public function check_username($username) {
         if ($this->user_model->check_username($username)) {
             return TRUE;
@@ -120,6 +131,7 @@ class Auth extends CI_Controller {
         }
     }
     
+    // Callback function untuk validasi email
     public function check_email($email) {
         if ($this->user_model->check_email($email)) {
             return TRUE;

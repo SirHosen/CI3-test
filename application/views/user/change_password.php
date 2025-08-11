@@ -24,7 +24,7 @@
                         <i class="fas fa-info-circle"></i> Password harus minimal 6 karakter dan disarankan menggunakan kombinasi huruf, angka, dan simbol.
                     </div>
                     
-                    <?php echo form_open('profile/change-password'); ?>
+                    <?php echo form_open('user/change_password'); ?>
                         <div class="mb-3">
                             <label for="current_password" class="form-label">
                                 <i class="fas fa-lock"></i> Password Lama <span class="text-danger">*</span>
@@ -80,23 +80,6 @@
                             </a>
                         </div>
                     <?php echo form_close(); ?>
-                </div>
-            </div>
-            
-            <!-- Password Tips -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6><i class="fas fa-lightbulb"></i> Tips Membuat Password yang Kuat</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Gunakan minimal 8 karakter</li>
-                        <li>Kombinasikan huruf besar dan kecil</li>
-                        <li>Tambahkan angka dan simbol (!@#$%^&*)</li>
-                        <li>Hindari informasi pribadi (nama, tanggal lahir)</li>
-                        <li>Jangan gunakan password yang sama untuk akun lain</li>
-                        <li>Ganti password secara berkala</li>
-                    </ul>
                 </div>
             </div>
         </div>

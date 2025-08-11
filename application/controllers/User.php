@@ -43,37 +43,58 @@ class User extends CI_Controller {
         $this->load->view('templates/footer');
     }
     
-    public function update_profile() {
-        $user_id = $this->session->userdata('user_id');
-        
-        $this->form_validation->set_rules('full_name', 'Nama Lengkap', 'required|trim');
-        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
-        
-        if ($this->form_validation->run() == FALSE) {
-            $this->edit_profile();
-        } else {
-            $data = array(
-                'full_name' => $this->input->post('full_name', TRUE),
-                'email' => $this->input->post('email', TRUE),
-                'updated_at' => date('Y-m-d H:i:s')
-            );
-            
-            $this->db->where('id', $user_id);
-            if ($this->db->update('users', $data)) {
-                $this->session->set_userdata(array(
-                    'email' => $data['email'],
-                    'full_name' => $data['full_name']
-                ));
-                
-                $this->user_model->log_activity($user_id, 'UPDATE_PROFILE', 'User updated profile');
-                $this->session->set_flashdata('success', 'Profile berhasil diupdate!');
-                redirect('user/profile');
-            } else {
-                $this->session->set_flashdata('error', 'Gagal mengupdate profile!');
-                redirect('user/edit_profile');
-            }
-        }
-    }
+		public function update_profile() {
+		$user_id = $this->session->userdata('user_id');
+		
+		$this->form_validation->set_rules('full_name', 'Nama Lengkap', 'required|trim');
+		$this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+		
+		if ($this->form_validation->run() == FALSE) {
+			$this->edit_profile();
+		} else {
+			// Cek apakah email berubah dan sudah digunakan user lain
+			$new_email = $this->input->post('email', TRUE);
+			$current_user = $this->user_model->get_user($user_id);
+			
+			if ($new_email != $current_user->email) {
+				// Cek apakah email sudah digunakan
+				$this->db->where('email', $new_email);
+				$this->db->where('id !=', $user_id);
+				$email_exists = $this->db->get('users')->num_rows() > 0;
+				
+				if ($email_exists) {
+					$this->session->set_flashdata('error', 'Email sudah digunakan user lain!');
+					redirect('user/edit_profile');
+					return;
+				}
+			}
+			
+			$data = array(
+				'full_name' => $this->input->post('full_name', TRUE),
+				'email' => $new_email,
+				'updated_at' => date('Y-m-d H:i:s')
+			);
+			
+			$this->db->where('id', $user_id);
+			if ($this->db->update('users', $data)) {
+				// Update session
+				$this->session->set_userdata(array(
+					'email' => $data['email'],
+					'full_name' => $data['full_name']
+				));
+				
+				// Log activity
+				$this->user_model->log_activity($user_id, 'UPDATE_PROFILE', 'User updated profile');
+				
+				$this->session->set_flashdata('success', 'Profile berhasil diupdate!');
+				redirect('user/profile');
+			} else {
+				$this->session->set_flashdata('error', 'Gagal mengupdate profile!');
+				redirect('user/edit_profile');
+			}
+		}
+	}
+
     
     public function change_password() {
         if ($this->input->post()) {

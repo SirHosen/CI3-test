@@ -13,7 +13,8 @@
                         </div>
                     <?php endif; ?>
                     
-                    <?php echo form_open('profile/update'); ?>
+                    <!-- PERBAIKI FORM ACTION -->
+                    <?php echo form_open('user/update_profile'); ?>
                         <div class="mb-3">
                             <label for="username" class="form-label">
                                 <i class="fas fa-user"></i> Username
@@ -41,33 +42,6 @@
                             <div class="form-text">Pastikan email aktif untuk notifikasi</div>
                         </div>
                         
-                        <!-- Additional fields (optional) -->
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">
-                                <i class="fas fa-phone"></i> Nomor Telepon
-                            </label>
-                            <input type="tel" class="form-control" name="phone" id="phone" 
-                                   value="<?php echo set_value('phone', isset($user->phone) ? $user->phone : ''); ?>" 
-                                   placeholder="08xx-xxxx-xxxx">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="address" class="form-label">
-                                <i class="fas fa-map-marker-alt"></i> Alamat
-                            </label>
-                            <textarea class="form-control" name="address" id="address" rows="3" 
-                                      placeholder="Masukkan alamat lengkap"><?php echo set_value('address', isset($user->address) ? $user->address : ''); ?></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="bio" class="form-label">
-                                <i class="fas fa-info-circle"></i> Bio / Tentang Saya
-                            </label>
-                            <textarea class="form-control" name="bio" id="bio" rows="3" 
-                                      placeholder="Ceritakan tentang diri Anda"><?php echo set_value('bio', isset($user->bio) ? $user->bio : ''); ?></textarea>
-                            <div class="form-text">Maksimal 500 karakter</div>
-                        </div>
-                        
                         <hr>
                         
                         <div class="alert alert-warning">
@@ -79,7 +53,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Simpan Perubahan
                             </button>
-                            <a href="<?php echo base_url('profile'); ?>" class="btn btn-secondary">
+                            <a href="<?php echo base_url('user/profile'); ?>" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Batal
                             </a>
                         </div>
@@ -108,6 +82,10 @@
         </div>
     </div>
 </div>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 
 <!-- Add Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

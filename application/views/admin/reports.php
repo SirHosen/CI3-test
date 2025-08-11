@@ -13,7 +13,7 @@
     <div class="d-none d-print-block print-header">
         <div class="text-center mb-4">
             <h2>LAPORAN SISTEM MANAJEMEN USER</h2>
-            <h4>CI3 Application</h4>
+            <h4>CI3 Testing</h4>
             <p>Tanggal Cetak: <?php echo date('d F Y H:i:s'); ?></p>
             <hr>
         </div>

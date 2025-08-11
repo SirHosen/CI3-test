@@ -60,17 +60,18 @@
                     </table>
                     
                     <!-- TOMBOL-TOMBOL ACTION -->
-                    <div class="mt-3 d-flex gap-2">
-                        <a href="<?php echo base_url('user/edit_profile'); ?>" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Edit Profile
-                        </a>
-                        <a href="<?php echo base_url('user/change_password'); ?>" class="btn btn-warning">
-                            <i class="fas fa-key"></i> Ubah Password
-                        </a>
-                        <a href="<?php echo base_url('dashboard'); ?>" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
-                    </div>
+                    <!-- PERBAIKI TOMBOL-TOMBOL ACTION -->
+					<div class="mt-3 d-flex gap-2">
+						<a href="<?php echo base_url('user/edit_profile'); ?>" class="btn btn-primary">
+							<i class="fas fa-edit"></i> Edit Profile
+						</a>
+						<a href="<?php echo base_url('user/change_password'); ?>" class="btn btn-warning">
+							<i class="fas fa-key"></i> Ubah Password
+						</a>
+						<a href="<?php echo base_url('dashboard'); ?>" class="btn btn-secondary">
+							<i class="fas fa-arrow-left"></i> Kembali
+						</a>
+					</div>
                 </div>
             </div>
             
